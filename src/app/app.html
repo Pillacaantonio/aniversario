@@ -1,0 +1,88 @@
+@if (!unlocked()) {
+  <main class="lock-screen" [class.is-unlocking]="unlocking()">
+    <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+    <div class="lock-intro"><span class="eyebrow">PARA TI, CON TODO MI AMOR</span><h1>Hay recuerdos que<br><em>solo tú</em> puedes abrir</h1><p>Tres números, una historia… la nuestra.</p></div>
+    <div class="lock-wrap" [class.shake]="error()" aria-label="Candado con combinación de tres números">
+      <div class="shackle"><span></span></div>
+      <div class="lock-body"><div class="heart-mark">♥</div><div class="wheel-row">
+        @for (value of wheels; track $index) {
+          <div class="wheel-control">
+            <button (click)="adjustWheel($index, -1)" [attr.aria-label]="'Restar a la rueda ' + ($index + 1)">⌃</button>
+            <div class="number-wheel" tabindex="0" (keydown.arrowup)="adjustWheel($index, -1); $event.preventDefault()" (keydown.arrowdown)="adjustWheel($index, 1); $event.preventDefault()" (wheel)="onWheel($event, $index)" (pointerdown)="startDrag($event, $index)" (pointermove)="drag($event)" (pointerup)="endDrag()" (pointercancel)="endDrag()">
+              <span class="ghost">{{ (value + 99) % 100 | number:'2.0-0' }}</span><strong>{{ value | number:'2.0-0' }}</strong><span class="ghost">{{ (value + 1) % 100 | number:'2.0-0' }}</span>
+            </div>
+            <button (click)="adjustWheel($index, 1)" [attr.aria-label]="'Sumar a la rueda ' + ($index + 1)">⌄</button>
+          </div>
+        }
+      </div><div class="lock-line"></div></div>
+    </div>
+    <button class="primary unlock-button" (click)="openWorld()" [disabled]="unlocking()"><span>{{ unlocking() ? 'Abriendo nuestro mundo…' : 'Abrir nuestro mundo' }}</span><b>♡</b></button>
+    <p class="error-message" [class.visible]="error()">Inténtalo otra vez, mi amor ♡</p><p class="hint">Desliza, usa las flechas o gira la rueda</p>
+    @if (unlocking()) { <div class="sparkles" aria-hidden="true">@for (n of [1,2,3,4,5,6,7,8]; track n) { <i></i> }</div> }
+  </main>
+} @else {
+  <div class="world">
+    <header class="topbar"><a href="#inicio" class="brand">tú & yo <span>♡</span></a><div class="top-actions">
+      @if (data.music) { <button class="icon-button" (click)="toggleMusic()" [attr.aria-label]="musicPlaying() ? 'Pausar música' : 'Reproducir música'">{{ musicPlaying() ? 'Ⅱ' : '♪' }}</button> }
+      <button class="edit-toggle" (click)="toggleEditing()">{{ editing() ? 'Cerrar edición' : 'Personalizar' }}</button>
+    </div><audio #audioPlayer [src]="data.music" loop></audio></header>
+
+    @if (editing()) {
+      <aside class="editor" aria-label="Modo edición">
+        <div class="editor-heading"><div><span class="eyebrow">MODO EDICIÓN</span><h2>Hazlo vuestro</h2></div><button class="close" (click)="toggleEditing()">×</button></div>
+        <label>Su nombre<input [(ngModel)]="data.name" (change)="save()"></label>
+        <label>Dedicatoria<textarea rows="4" [(ngModel)]="data.dedication" (change)="save()"></textarea></label>
+        <label>Fecha desde que estáis juntos<input type="date" [(ngModel)]="data.startDate" (change)="save()"></label>
+        <label class="file-label">Música de fondo <span>{{ data.music ? 'Cambiar canción' : 'Elegir canción (máx. 4.5 MB)' }}</span><input type="file" accept="audio/*" (change)="setMusic($event)"></label>
+        <div class="editor-note">Los cambios se guardan solo en este navegador. Exporta el regalo para llevar también fotos, textos y música a otro dispositivo.</div>
+        <div class="editor-actions"><button class="primary small" (click)="save()">{{ saved() ? 'Guardado ✓' : 'Guardar cambios' }}</button><button class="secondary small" (click)="exportGift()">Exportar</button></div>
+        <label class="import-label">Importar regalo<input type="file" accept="application/json" (change)="importGift($event)"></label>
+      </aside><div class="editor-scrim" (click)="toggleEditing()"></div>
+    }
+
+    <section class="hero" id="inicio">
+      <div class="hero-copy reveal"><span class="eyebrow">SOLO TÚ TIENES LA CLAVE</span><h1>Desde que llegaste,<br>mis días tienen<br><em>algo especial.</em></h1><p>{{ data.dedication }}</p><button class="primary" (click)="scrollToStory()">Recorrer nuestra historia <span>↓</span></button></div>
+      <div class="hero-art reveal">
+        @if (data.memories[0]?.image) { <div class="hero-photo"><img [src]="data.memories[0].image" alt="Nuestro recuerdo principal"></div> }
+        @else { <div class="hero-placeholder"><div class="orbit"><i></i><i></i><i></i></div><span class="mini-heart">♥</span><strong>{{ data.name }}</strong><small>nuestro lugar favorito</small>@if (editing()) { <label class="add-first">Añadir nuestra foto<input type="file" accept="image/*" (change)="addImages($event)"></label> }</div> }
+        <span class="hand-note">Todo empezó contigo ↗</span>
+      </div><div class="scroll-cue"><span></span> descubre lo que guardé para ti</div>
+    </section>
+
+    <section class="memories section" id="recuerdos"><div class="section-title"><span class="eyebrow">CAPÍTULO I · RECUERDOS</span><h2>Pedacitos de <em>nosotros</em></h2><p>Cada imagen guarda un instante; juntos, cuentan nuestra historia.</p></div>
+      <div class="polaroid-scene" [class.empty]="!data.memories.length">
+        @for (memory of data.memories; track memory.id; let i = $index) { <button class="polaroid" [style.--tilt]="((i % 2 ? 1 : -1) * (2 + (i % 3))) + 'deg'" (click)="memoryOpen.set(i)"><div class="photo"><img [src]="memory.image" [alt]="memory.title"></div><strong>{{ memory.title }}</strong><span>{{ memory.date || 'Un día para recordar' }}</span></button> }
+        @empty { <div class="empty-memory"><span>♡</span><h3>Aquí vivirán vuestras fotos</h3><p>No hemos puesto parejas desconocidas. Este espacio espera vuestros propios momentos.</p><label class="primary">Añadir nuestros recuerdos<input type="file" accept="image/*" multiple (change)="addImages($event)"></label></div> }
+        @if (data.memories.length && editing()) { <label class="add-polaroid"><span>＋</span>Añadir fotos<input type="file" accept="image/*" multiple (change)="addImages($event)"></label> }
+      </div>
+    </section>
+
+    <section class="timeline-section section"><div class="section-title left"><span class="eyebrow">CAPÍTULO II · EL CAMINO</span><h2>Todo lo que nos<br>trajo <em>hasta aquí</em></h2></div><div class="timeline">
+      @for (moment of data.timeline; track moment.id; let i = $index) { <article class="timeline-item"><div class="moment-number">0{{ i + 1 }}</div><div class="moment-visual" [class.has-image]="moment.image">@if (moment.image) { <img [src]="moment.image" [alt]="moment.title"> } @else { <span>♡</span> } @if (editing()) { <label class="image-edit">{{ moment.image ? 'Cambiar foto' : 'Añadir foto' }}<input type="file" accept="image/*" (change)="setTimelineImage($event, moment)"></label> }</div><div class="moment-copy">
+        @if (editing()) { <input class="inline date" [(ngModel)]="moment.date" (change)="save()"><input class="inline title" [(ngModel)]="moment.title" (change)="save()"><textarea class="inline text" rows="3" [(ngModel)]="moment.text" (change)="save()"></textarea><button class="text-danger" (click)="removeTimelineMoment(i)">Eliminar momento</button> }
+        @else { <span>{{ moment.date }}</span><h3>{{ moment.title }}</h3><p>{{ moment.text }}</p> }
+      </div></article> }
+    </div>@if (editing()) { <button class="secondary add-moment" (click)="addTimelineMoment()">＋ Añadir otro momento</button> }</section>
+
+    <section class="letter-section section"><div class="letter-intro"><span class="eyebrow">CAPÍTULO III · EN PALABRAS</span><h2>Hay cosas que<br>merecen una <em>carta.</em></h2><p>Lo que sigue fue escrito para leerse sin prisa.</p></div>
+      <button class="envelope" [class.open]="letterOpen()" (click)="letterOpen.set(!letterOpen())" aria-label="Abrir carta"><div class="envelope-back"></div><div class="paper"><span>Para {{ data.name }}</span><b>Tengo algo<br>que decirte…</b><i>♡</i></div><div class="flap"></div><div class="envelope-front"></div></button>
+      @if (letterOpen()) { <div class="letter-paper"><span class="eyebrow">PARA {{ data.name | uppercase }}</span><h3>Mi lugar favorito<br>siempre será contigo.</h3>@if (editing()) { <textarea rows="10" [(ngModel)]="data.letter" (change)="save()"></textarea> } @else { <p>{{ data.letter }}</p> }<div class="signature">Con todo mi amor, siempre ♡</div></div> }
+    </section>
+
+    <section class="time-section section"><span class="eyebrow">Y EL TIEMPO SIGUE CONTANDO…</span><h2>Todo este tiempo<br><em>eligiéndonos.</em></h2><div class="counter"><div><strong>{{ elapsed.years }}</strong><span>años</span></div><i>:</i><div><strong>{{ elapsed.months }}</strong><span>meses</span></div><i>:</i><div><strong>{{ elapsed.days }}</strong><span>días</span></div><i>:</i><div><strong>{{ elapsed.hours | number:'2.0-0' }}</strong><span>horas</span></div></div><p>Y todavía siento que lo mejor está por venir.</p></section>
+
+    <section class="surprises section"><div class="reason-card"><span class="eyebrow">UNA RAZÓN MÁS</span><div class="quote-mark">“</div>
+      @if (editing()) { <div class="reason-editor">@for (reason of data.reasons; track $index; let i = $index) { <div><textarea rows="2" [(ngModel)]="data.reasons[i]" (change)="save()"></textarea><button (click)="removeReason(i)">×</button></div> }<button class="secondary small" (click)="addReason()">＋ Añadir razón</button></div> }
+      @else { <blockquote>{{ data.reasons[reasonIndex()] }}</blockquote><button class="reason-button" (click)="nextReason()">Una razón más para quererte <span>→</span></button> }
+    </div><div class="hug-card"><span class="line-heart">♡</span><h3>Si hoy necesitas<br>un abrazo…</h3><p>Guardé uno aquí para cuando haga falta.</p><button class="secondary light" (click)="hugOpen.set(true)">Recibir un abrazo</button></div></section>
+
+    <footer><span class="footer-heart">♡</span><h2>Este lugar termina aquí.<br><em>Lo nuestro, no.</em></h2><p>Hecho con amor, para {{ data.name }}.</p><button class="back-top" (click)="scrollTop()">↑ Volver al inicio</button></footer>
+
+    @if (memoryOpen() !== null) { <div class="modal" (click)="memoryOpen.set(null)"><div class="memory-modal" (click)="$event.stopPropagation()"><button class="close modal-close" (click)="memoryOpen.set(null)">×</button><button class="nav prev" (click)="nextMemory(-1)">‹</button><img [src]="data.memories[memoryOpen()!].image" [alt]="data.memories[memoryOpen()!].title"><div class="memory-story">
+      @if (editing()) { <input class="inline title" [(ngModel)]="data.memories[memoryOpen()!].title"><input class="inline date" type="date" [(ngModel)]="data.memories[memoryOpen()!].date"><textarea class="inline text" rows="4" [(ngModel)]="data.memories[memoryOpen()!].note"></textarea><div class="modal-edit-actions"><button (click)="moveMemory(memoryOpen()!, -1)">← Mover</button><button (click)="moveMemory(memoryOpen()!, 1)">Mover →</button><button class="text-danger" (click)="removeMemory(memoryOpen()!)">Eliminar</button><button (click)="save()">Guardar</button></div> }
+      @else { <span>{{ data.memories[memoryOpen()!].date || 'Nuestro recuerdo' }}</span><h3>{{ data.memories[memoryOpen()!].title }}</h3><p>{{ data.memories[memoryOpen()!].note }}</p> }
+    </div><button class="nav next" (click)="nextMemory(1)">›</button></div></div> }
+
+    @if (hugOpen()) { <div class="modal hug-modal" (click)="hugOpen.set(false)"><div class="hug-message" (click)="$event.stopPropagation()"><div class="hug-rings"><i></i><i></i><i></i><span>♡</span></div><h3>Este abrazo es para ti.</h3>@if (editing()) { <textarea rows="5" [(ngModel)]="data.hugMessage" (change)="save()"></textarea> } @else { <p>{{ data.hugMessage }}</p> }<button class="secondary" (click)="hugOpen.set(false)">Guardarlo cerquita</button></div></div> }
+  </div>
+}
