@@ -1,6 +1,6 @@
 {
   "project_id": "appgprj_6ad69e7d0b8481918489889c8c3bf750",
   "static": {
-    "directory": "dist/sorpresa/browser"
+    "directory": "dist"
   }
 }
