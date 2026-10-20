@@ -13,7 +13,9 @@ const DEFAULT_DATA: LoveData = {
   name: 'Mi amor',
   dedication: 'Este rincón guarda lo que las palabras a veces no alcanzan a decir: la suerte inmensa de coincidir contigo.',
   startDate: '2022-10-20',
-  letter: 'Aquí puedes escribir tu carta. Cuéntale qué cambió desde que llegó, qué admiras de ella y todos esos pequeños detalles que hacen que tu mundo sea más bonito. Este texto es completamente editable desde el modo edición.',
+  letter: ' Desde que llegaste a mi vida, tengo más razones para sonreír. Me encanta compartir contigo las cosas más simples: conversar, reírnos de cualquier tontería y disfrutar de estar juntos. Son esos pequeños momentos los que más guardo en mi corazón.\n' +
+    '\n' +
+    'Admiro tu forma de ser y todo lo que te hace tan especial para mí. Gracias por tu cariño, por lo que hemos vivido y por dejarme ser parte de tu vida. Quiero seguir conociéndote, acompañándote y creando muchos recuerdos más contigo. Te amo. ❤️ ',
   reasons: [
     'Porque contigo hasta los días normales se sienten especiales.',
     'Por la forma en que tu sonrisa cambia el ánimo de todo un lugar.',
@@ -30,9 +32,8 @@ const DEFAULT_DATA: LoveData = {
     { id: 105, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.05%20AM.jpeg', title: 'Noches que brillan', date: '', note: 'El fuego, la noche y uno de esos recuerdos que siguen dando calor.' },
   ],
   timeline: [
-    { id: 1, title: 'Cómo empezó todo', date: 'Añade la fecha', text: 'Escribe aquí cómo comenzó vuestra historia.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(1).jpeg' },
-    { id: 2, title: 'Una sorpresa para recordar', date: 'Añade la fecha', text: 'Guarda aquí aquello que hizo especial este momento.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(4).jpeg' },
-    { id: 3, title: 'Un día para siempre', date: 'Añade la fecha', text: 'Cuenta qué convirtió este día en uno de vuestros favoritos.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(2).jpeg' },
+    { id: 1, title: 'Cómo empezó todo', date: '20-10-22', text: 'Quién diría que ese primer momento juntos sería el inicio de tantos recuerdos bonitos. Así comenzó lo nuestro. ❤️', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(1).jpeg' },
+     { id: 3, title: 'Un día para siempre', date: '20-10-26', text: 'Celebrar un año más de tu vida y compartir tu alegría fue un regalo para mí. Que vengan muchos cumpleaños más juntos. ❤️', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(2).jpeg' },
   ],
   music: '',
 };
