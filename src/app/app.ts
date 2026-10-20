@@ -22,11 +22,17 @@ const DEFAULT_DATA: LoveData = {
     'Porque elegirte se siente como volver a casa.',
   ],
   hugMessage: 'Respira despacio. Aunque no esté justo a tu lado, quiero que sientas mis brazos rodeándote y recuerdes que nunca estás sola.',
-  memories: [],
+  memories: [
+    { id: 101, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM.jpeg', title: 'Juntos, siempre', date: '', note: 'Uno de esos instantes que quiero guardar para siempre. Puedes editar esta dedicatoria y contar aquí toda su historia.' },
+    { id: 102, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(4).jpeg', title: 'Tu sonrisa', date: '', note: 'Flores, una sorpresa y esa sonrisa que hace más bonito cualquier lugar.' },
+    { id: 103, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(2).jpeg', title: 'Un día especial', date: '', note: 'Una celebración que ahora también forma parte de nuestro álbum.' },
+    { id: 104, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(1).jpeg', title: 'Cerquita de ti', date: '', note: 'Una foto sencilla, pero llena de todo lo que somos cuando estamos juntos.' },
+    { id: 105, image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.05%20AM.jpeg', title: 'Noches que brillan', date: '', note: 'El fuego, la noche y uno de esos recuerdos que siguen dando calor.' },
+  ],
   timeline: [
-    { id: 1, title: 'Cómo empezó todo', date: 'Añade la fecha', text: 'Escribe aquí cómo comenzó vuestra historia.', image: '' },
-    { id: 2, title: 'Nuestra primera salida', date: 'Añade la fecha', text: 'Guarda aquí aquello que ninguno de los dos quiere olvidar.', image: '' },
-    { id: 3, title: 'Un día para siempre', date: 'Añade la fecha', text: 'Cuenta qué convirtió este momento en uno de vuestros favoritos.', image: '' },
+    { id: 1, title: 'Cómo empezó todo', date: 'Añade la fecha', text: 'Escribe aquí cómo comenzó vuestra historia.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(1).jpeg' },
+    { id: 2, title: 'Una sorpresa para recordar', date: 'Añade la fecha', text: 'Guarda aquí aquello que hizo especial este momento.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(4).jpeg' },
+    { id: 3, title: 'Un día para siempre', date: 'Añade la fecha', text: 'Cuenta qué convirtió este día en uno de vuestros favoritos.', image: '/WhatsApp%20Image%202026-10-20%20at%2012.10.06%20AM%20(2).jpeg' },
   ],
   music: '',
 };
@@ -59,7 +65,16 @@ export class App implements OnInit, OnDestroy {
   ngOnInit(): void {
     const stored = localStorage.getItem('solo-tu-tienes-la-clave');
     if (stored) {
-      try { this.data = { ...structuredClone(DEFAULT_DATA), ...JSON.parse(stored) }; }
+      try {
+        this.data = { ...structuredClone(DEFAULT_DATA), ...JSON.parse(stored) };
+        if (!this.data.memories?.length) this.data.memories = structuredClone(DEFAULT_DATA.memories);
+        if (this.data.timeline?.length && this.data.timeline.every((moment) => !moment.image)) {
+          this.data.timeline = this.data.timeline.map((moment, index) => ({
+            ...moment,
+            image: DEFAULT_DATA.timeline[index]?.image ?? '',
+          }));
+        }
+      }
       catch { /* Keep safe defaults if old data is invalid. */ }
     }
     this.clock = setInterval(() => (this.now = new Date()), 1000);
